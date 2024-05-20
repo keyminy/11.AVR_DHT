@@ -19,6 +19,9 @@ int job = 5;
 
 int main(void)
 {
+	int result;
+	uint8_t bits[5]; // Array to store the read bytes
+	
 	init_timer0();
 	init_uart0();
 	init_uart1();
@@ -32,11 +35,19 @@ int main(void)
 	printf("DHT11 Test!!!\n");
     while (1) 
     {
-		// 온습도센서 체크 로직
-		dht11_main();
-		_delay_ms(2000);
+		result = myDHT_Read(bits);
+		if(result == DHT_Ok){
+			printf("humi : %d.%d\n",bits[0],bits[1]);  // 습도의 정수부분, 소수부분
+			printf("temp : %d.%d\n",bits[2],bits[3]); // 온도의 정수부분, 소수부분
+			printf("checksum : %d\n",bits[4]); // 온도의 정수부분, 소수부분
+		}else{
+			printf("Failed to read DHT11 : Error %d\n",result);
+		}
+		_delay_ms(2000); // Delay between reads to meet sensor's timing requirement
     }
 }
+
+
 
 void dht11_main(void){
 	char temp[2],humi[2];

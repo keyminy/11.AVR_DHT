@@ -213,6 +213,8 @@ void DHT_Read(uint8_t *Temperature, uint8_t *Humidity)
 	}
 }
 
+
+
 //Convert temperature from Celsius to Fahrenheit. 
 double DHT_ConvertToFahrenheit(double Temperature)
 {
@@ -255,4 +257,59 @@ static double DataToHum(uint8_t Data0, uint8_t Data1)
 	return hum;
 }
 #endif
+//---------------------------------------------//
+
+//----- What I added ----------//
+int myDHT_Read(uint8_t* bits){
+	uint8_t i,j,result = 0;
+	
+	// Start signal(MCU signal)
+	DHT_DDR |= (1 << DHT_INPUTPIN); // Set data pin as output
+	DHT_PORT &= ~(1 << DHT_INPUTPIN); // Pull low for at least 18ms
+	_delay_ms(18); 
+	DHT_PORT |= (1 << DHT_INPUTPIN); // Pull high for 20~40us
+	_delay_us(40);
+	
+	DHT_DDR &= ~(1<<DHT_INPUTPIN); // set data pin as input
+	_delay_us(10); // Delay a bit for sensor response
+	
+	/* DHT response */
+	// Check for sensor response
+	if(DHT_PIN & (1 << DHT_INPUTPIN)) {
+		return DHT_Error_Timeout; // Sensor did not pull the pin low
+	}
+	_delay_us(80); // Wait for the ready signal
+	
+	if(!(DHT_PIN & (1 << DHT_INPUTPIN))) {
+		return DHT_Error_Timeout; // Sensor did not release the pin
+	}
+	 
+	_delay_us(80); // Sensor pulling the pin high ready to send data
+	
+	// Read the data : 5 bytes
+	for(j = 0; j < 5; j++){
+		//read 5 byte
+		result = 0;
+		for(i=0; i< 8;i++){
+			//read every bit
+			while(!(DHT_PIN & (1<<DHT_INPUTPIN))); // wait for the pin go high
+			_delay_us(35);	// Wait to sample the bit	//Wait for more than 28us
+			//_delay_us(30); // Wait to sample the bit
+			if(DHT_PIN & (1 << DHT_INPUTPIN)){
+				// if input is high after 30 us, get result
+				result |= (1 << (7-i)); // If high, set bit
+			}
+			while(DHT_PIN & (1<<DHT_INPUTPIN)); // wait untill input get low
+		}
+		bits[j] = result;
+	}
+	// Checksum validation
+	if ((uint8_t)(bits[0] + bits[1] + bits[2] + bits[3]) == bits[4]) {
+		return DHT_Ok;
+	} else {
+		return DHT_Error_Checksum;
+	}
+}
+
+
 //---------------------------------------------//

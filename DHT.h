@@ -46,4 +46,9 @@ void DHT_Read(uint8_t *Temperature, uint8_t *Humidity);
 double DHT_ConvertToFahrenheit(double Temperature);
 double DHT_ConvertToKelvin(double Temperature);
 //-------------------------------------------//
+
+//----- What I added ----------//
+int myDHT_Read(uint8_t* bits);
+//---------------------------------------------//
+
 #endif

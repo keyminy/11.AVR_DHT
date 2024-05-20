@@ -18,4 +18,12 @@
 // #define DHT_Pin		C, 0       // Orginal
 #define DHT_Pin		F, 7
 //----------------------------------------------//
+
+//----- What I added --------------------------//
+#define DHT_PIN PINF
+#define DHT_INPUTPIN 7
+#define DHT_DDR DDRF
+#define DHT_PORT PORTF
+//----------------------------------------------//
+
 #endif
